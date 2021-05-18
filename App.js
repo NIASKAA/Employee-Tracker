@@ -1,14 +1,13 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql');
-const { allowedNodeEnvironmentFlags } = require('process');
 
 const connectmySQL = mysql.createConnection({
+    multipleStatements: true,
     host: 'localhost',
-    port: '3306',
+    port: 3306,
     user: 'root',
     password: 'Crossbonex1',
     database: 'employeeTrackerDB',
-    multipleStatements: true,
 });
 
 connectmySQL.connect = (err) => {
@@ -31,7 +30,8 @@ function menuPrompt() {
                 'Update employee',
                 'Exit'
             ]
-    }).then((res) => {
+    })
+    .then((res) => {
         console.log(res.userChoice);
         switch(res.userChoice){
             case 'View departments':
@@ -61,14 +61,14 @@ function menuPrompt() {
         }
     }).catch((err) => {
         console.log(err)
-    })
+    });
 }
     
     
-
-const viewDepartments = () => {
+function viewDepartments() {
     let insertSQL = "SELECT * FROM department";
     connectmySQL.query(insertSQL, function(err, res) {
+        console.log(`Departments:`)
         res.forEach(department => {
             console.log(`ID: ${department.id} | ${department.name}`) 
         })
@@ -76,8 +76,8 @@ const viewDepartments = () => {
     });
 };
 
-const viewEmployees = () => {
-    let insertSQL ="SELECT * FROM employee";
+function viewEmployees() {
+    let insertSQL = "SELECT * FROM employee";
     connectmySQL.query(insertSQL, function(err, res) {
         res.forEach(employee => {
             console.log(`ID: ${employee.id} | Name: ${employee.firstName} ${employee.lastName} | Role ID: ${employee.roleID} | Manager ID: ${employee.managerID}`);
@@ -86,22 +86,38 @@ const viewEmployees = () => {
     });
 };
 
-const viewRole = () => {
+function viewRole() {
+    let insertSQL = "SELECT * FROM role";
+    connectmySQL.query(insertSQL, function(err, res) {
+        res.foreach(role => {
+            console.log(`ID: ${role.id} | Title: ${role.title} | Salary: ${role.salary} | Department ID: ${role.departmentID}`);
+        })
+        menuPrompt();
+    })
+};
+
+function addEmployee() {
+    inquirer.prompt({
+        name: "firstName",
+        type: "input",
+        message: "Insert First Name",
+    },
+    {
+        name: "lastName",
+        type: "input",
+        message: "Insert Last Name",
+    }
+    )
+};
+
+function addRole() {
 
 };
 
-const addEmployee = () => {
+function addDepartment() {
 
 };
 
-const addRole = () => {
-
-};
-
-const addDepartment = () => {
-
-};
-
-const updateEmployee = () => {
+function updateEmployee() {
 
 };

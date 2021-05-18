@@ -2,9 +2,10 @@
   "name": "employee-tracker",
   "version": "1.0.0",
   "description": "",
-  "main": "App.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node App.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
@@ -16,5 +17,10 @@
   "bugs": {
     "url": "https://github.com/NIASKAA/Employee-Tracker/issues"
   },
-  "homepage": "https://github.com/NIASKAA/Employee-Tracker#readme"
+  "homepage": "https://github.com/NIASKAA/Employee-Tracker#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "inquirer": "^8.0.0",
+    "mysql": "^2.18.1"
+  }
 }
