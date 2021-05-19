@@ -1,19 +1,19 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql');
 
-const connectmySQL = mysql.createConnection({
+const connectToSQL = mysql.createConnection({
     multipleStatements: true,
     host: 'localhost',
     port: 3306,
     user: 'root',
     password: 'Crossbonex1',
-    database: 'employeeTrackerDB',
+    database: 'employeeTrackerDB'
 });
 
-connectmySQL.connect = (err) => {
+connectToSQL.connect((err) => {
     if(err) throw err;
     menuPrompt();
-};
+});
 
 function menuPrompt() {
     inquirer.prompt({
@@ -27,7 +27,7 @@ function menuPrompt() {
                 'Add employee',
                 'Add new role',
                 'Add new department',
-                'Update employee',
+                'Update employee roles',
                 'Exit'
             ]
     })
@@ -53,10 +53,10 @@ function menuPrompt() {
                 addDepartment();
                 break;
             case 'Update employee':
-                updateEmployee();
+                updateEmployeeRoles();
                 break;
             case 'Exit':
-                connectmySQL.end();
+                connectToSQL.end();
                 break;
         }
     }).catch((err) => {
@@ -65,10 +65,9 @@ function menuPrompt() {
 }
     
     
-function viewDepartments() {
+const viewDepartments = () => {
     let insertSQL = "SELECT * FROM department";
-    connectmySQL.query(insertSQL, function(err, res) {
-        console.log(`Departments:`)
+    connectToSQL.query(insertSQL, function(err, res) {
         res.forEach(department => {
             console.log(`ID: ${department.id} | ${department.name}`) 
         })
@@ -76,9 +75,9 @@ function viewDepartments() {
     });
 };
 
-function viewEmployees() {
+const viewEmployees = () => {
     let insertSQL = "SELECT * FROM employee";
-    connectmySQL.query(insertSQL, function(err, res) {
+    connectToSQL.query(insertSQL, function(err, res) {
         res.forEach(employee => {
             console.log(`ID: ${employee.id} | Name: ${employee.firstName} ${employee.lastName} | Role ID: ${employee.roleID} | Manager ID: ${employee.managerID}`);
         })
@@ -86,38 +85,59 @@ function viewEmployees() {
     });
 };
 
-function viewRole() {
+const viewRole = () => {
     let insertSQL = "SELECT * FROM role";
     connectmySQL.query(insertSQL, function(err, res) {
         res.foreach(role => {
             console.log(`ID: ${role.id} | Title: ${role.title} | Salary: ${role.salary} | Department ID: ${role.departmentID}`);
         })
         menuPrompt();
-    })
+    });
 };
 
-function addEmployee() {
+const addEmployee = () => {
+    connectToSQL.query("SELECT * FROM role", ((err, result) => {
+        if(err) throw (err);
+        inquirer.prompt([{
+            name: "firstName",
+            type: "input",
+            message: "Insert First Name",
+        },
+        {
+            name: "lastName",
+            type: "input",
+            message: "Insert Last Name",
+        },
+        {
+            name: "roleName",
+            type: "list",
+            message: "Insert role",
+
+        }
+        ])
+        .then((answer) => {
+            console.log(answer)
+        })
+    }));
+};
+
+const addRole = () => {
+
+};
+
+const addDepartment = () => {
     inquirer.prompt({
-        name: "firstName",
+        name: "department",
         type: "input",
-        message: "Insert First Name",
-    },
-    {
-        name: "lastName",
-        type: "input",
-        message: "Insert Last Name",
-    }
-    )
+        message: "Insert New Department"
+    }).then((answer) => {
+        let insertSQL = "INSERT INTO department (name) VALUES ( ? )";
+        connectToSQL.query(insertSQL, answer.department, ((err, res) => {
+        }))
+        menuPrompt();
+    });
 };
 
-function addRole() {
-
-};
-
-function addDepartment() {
-
-};
-
-function updateEmployee() {
+const updateEmployeeRoles = () => {
 
 };
