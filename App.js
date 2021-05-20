@@ -1,3 +1,4 @@
+const { connect } = require('http2');
 const inquirer = require('inquirer');
 const mysql = require('mysql');
 
@@ -23,7 +24,7 @@ function menuPrompt() {
             choices: [
                 'View departments',
                 'View all employees',
-                'View roles',
+                'View Roles',
                 'Add employee',
                 'Add new role',
                 'Add new department',
@@ -40,8 +41,8 @@ function menuPrompt() {
             case 'View all employees':
                 viewEmployees();
                 break;
-            case 'View Role':
-                viewRole();
+            case 'View Roles':
+                viewRoles();
                 break;
             case 'Add employee':
                 addEmployee();
@@ -85,10 +86,10 @@ const viewEmployees = () => {
     });
 };
 
-const viewRole = () => {
+const viewRoles = () => {
     let insertSQL = "SELECT * FROM role";
-    connectmySQL.query(insertSQL, function(err, res) {
-        res.foreach(role => {
+    connectToSQL.query(insertSQL, function(err, res) {
+        res.forEach(role => {
             console.log(`ID: ${role.id} | Title: ${role.title} | Salary: ${role.salary} | Department ID: ${role.departmentID}`);
         })
         menuPrompt();
@@ -96,33 +97,11 @@ const viewRole = () => {
 };
 
 const addEmployee = () => {
-    connectToSQL.query("SELECT * FROM role", ((err, result) => {
-        if(err) throw (err);
-        inquirer.prompt([{
-            name: "firstName",
-            type: "input",
-            message: "Insert First Name",
-        },
-        {
-            name: "lastName",
-            type: "input",
-            message: "Insert Last Name",
-        },
-        {
-            name: "roleName",
-            type: "list",
-            message: "Insert role",
 
-        }
-        ])
-        .then((answer) => {
-            console.log(answer)
-        })
-    }));
-};
+}
 
 const addRole = () => {
-    connectToSQL.query("SELECT * FROM department", ((err, result) => {
+    connectToSQL.query("SELECT * FROM department", ((err, res) => {
         if(err) throw (err);
         inquirer.prompt([
             {
@@ -136,13 +115,36 @@ const addRole = () => {
                 message: "Insert Salary",
             },
             {
-                name: "departmentID",
-                type: "input",
-                message: "Insert Department ID"
+                name: "departmentName",
+                type: "list",
+                message: "Insert Department Name",
+                choices: function() {
+                    let getDepartmentList = [];
+                    res.forEach(res => {
+                        getDepartmentList.push(
+                            res.name
+                        );
+                    })
+                    return getDepartmentList;
+                }
             }
         ])
         .then((answer) => {
-            console.log(answer)
+            const department = answer.departmentName;
+            connectToSQL.query('SELECT * FROM department', function(err, res) {
+                if(err) throw (err); 
+                let  filterDepartment = res.filter(function(res) {
+                    return res.name == department;
+                })
+                let id = filterDepartment[0].id;
+                let insertSQL = "INSERT INTO role (title, salary, departmentID) VALUES (?, ?, ?)";
+                let values = [answer.title, parseInt(answer.salary), id]
+                console.log(values);
+                connectToSQL.query(insertSQL, values, function(err, res, fields) {
+                    console.log(`Added`)
+                })
+                viewRole()
+            })
         })
     }));
 };
@@ -161,5 +163,5 @@ const addDepartment = () => {
 };
 
 const updateEmployeeRoles = () => {
-
+    
 };
