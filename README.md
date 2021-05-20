@@ -2,8 +2,8 @@
 Employee-Tracker
 
 # About
-Creating an application that uses express to write out notes. It can save and delete just like any other note. 
-Refreshing will not get rid of the storage as it is stored in local storage. 
+This application takes your input from the terminal and stores it into a database (In this case, it's MYSQL)
+User is able to add in new data as well change the selected data. 
 
 # Usage
 Node.js, Javascript, Inquirer.js, mySql
