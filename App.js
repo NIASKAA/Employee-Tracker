@@ -122,7 +122,29 @@ const addEmployee = () => {
 };
 
 const addRole = () => {
-
+    connectToSQL.query("SELECT * FROM department", ((err, result) => {
+        if(err) throw (err);
+        inquirer.prompt([
+            {
+                name: "title",
+                type: "input",
+                message: "Insert Title",
+            },
+            {
+                name: "salary",
+                type: "input",
+                message: "Insert Salary",
+            },
+            {
+                name: "departmentID",
+                type: "input",
+                message: "Insert Department ID"
+            }
+        ])
+        .then((answer) => {
+            console.log(answer)
+        })
+    }));
 };
 
 const addDepartment = () => {
