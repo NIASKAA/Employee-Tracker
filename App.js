@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql');
 
+// connectTOSQL will be used to create the connection to mysql workbench
 const connectToSQL = mysql.createConnection({
     multipleStatements: true,
     host: 'localhost',
@@ -15,6 +16,7 @@ connectToSQL.connect((err) => {
     menuPrompt();
 });
 
+// this function will always be the first thing that will load when called so client will see the options when prompted. 
 function menuPrompt() {
     inquirer.prompt({
             type: 'list',
@@ -64,7 +66,8 @@ function menuPrompt() {
     });
 }
     
-    
+
+//function for viewing the available departments
 const viewDepartments = () => {
     let insertSQL = "SELECT * FROM department";
     connectToSQL.query(insertSQL, function(err, res) {
@@ -75,6 +78,7 @@ const viewDepartments = () => {
     });
 };
 
+//function for viewing the available employees
 const viewEmployees = () => {
     let insertSQL = "SELECT * FROM employee";
     connectToSQL.query(insertSQL, function(err, res) {
@@ -85,6 +89,7 @@ const viewEmployees = () => {
     });
 };
 
+//function for viewing the available roles 
 const viewRoles = () => {
     let insertSQL = "SELECT * FROM role";
     connectToSQL.query(insertSQL, function(err, res) {
@@ -95,6 +100,8 @@ const viewRoles = () => {
     });
 };
 
+// this function first make a connection to mysql first before doing anything else. After making contact, we now prompt user 
+// they want to insert.
 const addEmployee = () => {
     connectToSQL.query("SELECT * FROM role", ((err, res) => {
         if(err) throw (err);
@@ -114,6 +121,7 @@ const addEmployee = () => {
                 type: "list",
                 message: "Insert Role",
                 choices: function() {
+                    // using forEach to create a new array for each title in role
                     getRoleList = [];
                     res.forEach(res => {
                         getRoleList.push(res.title);
@@ -124,6 +132,7 @@ const addEmployee = () => {
         ])
         .then((answer) => {
             const role = answer.roleName;
+            // res.filter will get rid of other unwanted titles. 
             connectToSQL.query("SELECT * FROM role", function(err, res) {
                 if(err) throw (err);
                 let filterRole = res.filter((res) => {
@@ -167,6 +176,7 @@ const addEmployee = () => {
     }))
 }
 
+// the function does the same sequence as addEmployee where it first make connect with mysql before prompt
 const addRole = () => {
     connectToSQL.query("SELECT * FROM department", ((err, res) => {
         if(err) throw (err);
@@ -216,6 +226,7 @@ const addRole = () => {
     }));
 };
 
+// this function does a simple insertion into mysql
 const addDepartment = () => {
     inquirer.prompt({
         name: "department",
@@ -229,6 +240,8 @@ const addDepartment = () => {
     });
 };
 
+// idPrompt was made solely because it was easier to get the employee ID in order to update. So we set this up 
+// before the actual update function
 const idPrompt = () => {
     return ([
         {
@@ -240,8 +253,8 @@ const idPrompt = () => {
 }
 
 const updateEmployeeRoles = async () => {
+    // using await and async to get employee id first
     const employeeID = await inquirer.prompt(idPrompt());
-
     connectToSQL.query("SELECT role.id, role.title FROM role ORDER BY role.id;", async (err, res) => {
         if(err) throw err;
         const { role } = await inquirer.prompt([
@@ -267,3 +280,4 @@ const updateEmployeeRoles = async () => {
         menuPrompt();
     });
 };
+// arguably the hardest part of the hw is the update role function
