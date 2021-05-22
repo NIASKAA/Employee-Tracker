@@ -1,4 +1,3 @@
-const { connect } = require('http2');
 const inquirer = require('inquirer');
 const mysql = require('mysql');
 
@@ -22,38 +21,38 @@ function menuPrompt() {
             name: 'userChoice',
             message: 'Choose a selection',
             choices: [
-                'View departments',
-                'View all employees',
+                'View Departments',
+                'View All Employees',
                 'View Roles',
-                'Add employee',
-                'Add new role',
-                'Add new department',
-                'Update employee roles',
+                'Add Employee',
+                'Add New Role',
+                'Add New Department',
+                'Update Employee Role',
                 'Exit'
             ]
     })
     .then((res) => {
         console.log(res.userChoice);
         switch(res.userChoice){
-            case 'View departments':
+            case 'View Departments':
                 viewDepartments();
                 break;
-            case 'View all employees':
+            case 'View All Employees':
                 viewEmployees();
                 break;
             case 'View Roles':
                 viewRoles();
                 break;
-            case 'Add employee':
+            case 'Add Employee':
                 addEmployee();
                 break;
-            case 'Add new role':
+            case 'Add New Role':
                 addRole();
                 break;
-            case 'Add new department':
+            case 'Add New Department':
                 addDepartment();
                 break;
-            case 'Update employee':
+            case 'Update Employee Role':
                 updateEmployeeRoles();
                 break;
             case 'Exit':
@@ -97,7 +96,75 @@ const viewRoles = () => {
 };
 
 const addEmployee = () => {
-
+    connectToSQL.query("SELECT * FROM role", ((err, res) => {
+        if(err) throw (err);
+        inquirer.prompt([
+            {
+                name: "firstName",
+                type: "input",
+                message: "Insert First Name",
+            },
+            {
+                name: "lastName",
+                type: "input",
+                message: "Insert Last Name",
+            },
+            {
+                name: "roleName",
+                type: "list",
+                message: "Insert Role",
+                choices: function() {
+                    getRoleList = [];
+                    res.forEach(res => {
+                        getRoleList.push(res.title);
+                    });
+                    return getRoleList;
+                }
+            }
+        ])
+        .then((answer) => {
+            const role = answer.roleName;
+            connectToSQL.query("SELECT * FROM role", function(err, res) {
+                if(err) throw (err);
+                let filterRole = res.filter((res) => {
+                    return res.title == role;
+                })
+                let roleID = filterRole[0].id;
+                connectToSQL.query("SELECT * FROM employee", function(err, res) {
+                    inquirer.prompt([
+                        {
+                            name: "manager",
+                            type: 'list',
+                            message: "Insert Manager",
+                            choices: function() {
+                                getManagerList = [];
+                                res.forEach(res => {
+                                    getManagerList.push(res.lastName)
+                                })
+                                return getManagerList;
+                            }
+                        }
+                    ])
+                    .then((managerAnswer) => {
+                        const manager = managerAnswer.manager;
+                        connectToSQL.query("SELECT * FROM employee", function(err, res){
+                            if(err) throw (err);
+                            let filterManager = res.filter((res) => {
+                                return res.lastName == manager;
+                            })
+                            let managerID = filterManager[0].id;
+                            let insertSQL = "INSERT INTO employee (firstName, lastName, roleID, managerID) VALUES (?, ?, ?, ?)";
+                            let values = [answer.firstName, answer.lastName, roleID, managerID]
+                            connectToSQL.query(insertSQL, values, function(err, res, fields) {
+                                console.log('Added');
+                            })
+                            viewEmployees();
+                        })
+                    })
+                })
+            })
+        })
+    }))
 }
 
 const addRole = () => {
@@ -143,7 +210,7 @@ const addRole = () => {
                 connectToSQL.query(insertSQL, values, function(err, res, fields) {
                     console.log(`Added`)
                 })
-                viewRole()
+                viewRoles();
             })
         })
     }));
@@ -162,6 +229,41 @@ const addDepartment = () => {
     });
 };
 
-const updateEmployeeRoles = () => {
-    
+const idPrompt = () => {
+    return ([
+        {
+            name: "name",
+            type: "input",
+            message: "Insert Employee ID",
+        }
+    ]);
+}
+
+const updateEmployeeRoles = async () => {
+    const employeeID = await inquirer.prompt(idPrompt());
+
+    connectToSQL.query("SELECT role.id, role.title FROM role ORDER BY role.id;", async (err, res) => {
+        if(err) throw err;
+        const { role } = await inquirer.prompt([
+            {
+                name: "role",
+                type: "list",
+                choices: () => res.map(res => res.title),
+                message: "Insert New Role",
+            }
+        ]);
+
+        let roleID;
+        for (const row of res) {
+            if (row.title === role) {
+                roleID = row.id;
+                continue;
+            }
+        }
+        connectToSQL.query(`UPDATE employee SET roleID = ${roleID} WHERE employee.id = ${employeeID.name}`, async (err, res) => {
+            if (err) throw err;
+            console.log("Role Updated")
+        });
+        menuPrompt();
+    });
 };
