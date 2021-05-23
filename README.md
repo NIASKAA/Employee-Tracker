@@ -15,7 +15,7 @@ Node.js, Javascript, Inquirer.js, mySql
 
 # Links to application
 Link to repo: https://github.com/NIASKAA/Employee-Tracker \
-Link to Youtube quick walk-through: https://youtu.be/C819Xti7mVM \
+Link to Youtube quick walk-through: https://youtu.be/C819Xti7mVM 
 
 # Contribution 
 None, only me. 
